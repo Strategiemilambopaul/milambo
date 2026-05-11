@@ -1,14 +1,16 @@
-import { createContext, useContext, useEffect, useMemo, useReducer } from 'react'
+import { createContext, useContext, useEffect, useMemo, useReducer, useState } from 'react'
 import type { ReactNode } from 'react'
 import type { BudgetHistoryEntry, BudgetState, Expense, ExpenseFormValues } from '../types/budget'
 import { computeBudgetSummary, computeExpenseTotal, roundCurrency } from '../utils/calculations'
 import { loadBudgetState, saveBudgetState } from '../utils/storage'
+import { loadBudgetStateFromSupabase, saveBudgetStateToSupabase } from '../utils/supabaseState'
 
 type BudgetAction =
   | { type: 'set-initial-budget'; payload: number }
   | { type: 'add-expense'; payload: ExpenseFormValues }
   | { type: 'update-expense'; payload: { expenseId: string; values: ExpenseFormValues } }
   | { type: 'delete-expense'; payload: { expenseId: string } }
+  | { type: 'replace-state'; payload: BudgetState }
 
 interface BudgetContextValue {
   state: BudgetState
@@ -98,6 +100,8 @@ function budgetReducer(state: BudgetState, action: BudgetAction): BudgetState {
         history: [historyEntry, ...state.history].slice(0, MAX_HISTORY_ITEMS),
       }
     }
+    case 'replace-state':
+      return action.payload
     default:
       return state
   }
@@ -105,10 +109,42 @@ function budgetReducer(state: BudgetState, action: BudgetAction): BudgetState {
 
 export function BudgetProvider({ children }: { children: ReactNode }) {
   const [state, dispatch] = useReducer(budgetReducer, undefined, loadBudgetState)
+  const [cloudReady, setCloudReady] = useState(false)
+
+  useEffect(() => {
+    let isMounted = true
+    const syncFromCloud = async () => {
+      try {
+        const cloudState = await loadBudgetStateFromSupabase()
+        if (isMounted && cloudState) {
+          dispatch({ type: 'replace-state', payload: cloudState })
+        }
+      } catch (error) {
+        console.warn('Sync Supabase indisponible, mode local utilise.', error)
+      } finally {
+        if (isMounted) {
+          setCloudReady(true)
+        }
+      }
+    }
+
+    syncFromCloud()
+
+    return () => {
+      isMounted = false
+    }
+  }, [])
 
   useEffect(() => {
     saveBudgetState(state)
-  }, [state])
+    if (!cloudReady) {
+      return
+    }
+
+    saveBudgetStateToSupabase(state).catch((error) => {
+      console.warn('Echec de sauvegarde cloud Supabase.', error)
+    })
+  }, [cloudReady, state])
 
   const contextValue = useMemo<BudgetContextValue>(() => {
     const summary = computeBudgetSummary(state.initialBudget, state.expenses)

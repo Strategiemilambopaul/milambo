@@ -11,11 +11,15 @@ const CATEGORY_ALIASES: Record<string, Category> = {
   'Mange macon': 'Repas macon',
 }
 
-const initialState: BudgetState = {
-  initialBudget: DEFAULT_INITIAL_BUDGET,
-  expenses: [],
-  history: [],
+export function createDefaultBudgetState(): BudgetState {
+  return {
+    initialBudget: DEFAULT_INITIAL_BUDGET,
+    expenses: [],
+    history: [],
+  }
 }
+
+const initialState: BudgetState = createDefaultBudgetState()
 
 function isCategory(value: string): value is Category {
   return DEFAULT_CATEGORIES.includes(value as Category)
@@ -67,6 +71,27 @@ function normalizeHistoryItem(rawHistory: Partial<BudgetHistoryEntry>): BudgetHi
   }
 }
 
+export function normalizeBudgetState(rawState: Partial<BudgetState>): BudgetState {
+  const budgetRaw = Number(rawState.initialBudget ?? DEFAULT_INITIAL_BUDGET)
+  const initialBudget =
+    Number.isFinite(budgetRaw) && budgetRaw >= 0 ? roundCurrency(budgetRaw) : DEFAULT_INITIAL_BUDGET
+
+  const expenses = (rawState.expenses ?? [])
+    .map((expense) => normalizeExpense(expense))
+    .filter((expense): expense is Expense => Boolean(expense))
+
+  const history = (rawState.history ?? [])
+    .map((item) => normalizeHistoryItem(item))
+    .filter((item): item is BudgetHistoryEntry => Boolean(item))
+    .slice(0, MAX_HISTORY_ITEMS)
+
+  return {
+    initialBudget,
+    expenses,
+    history,
+  }
+}
+
 export function loadBudgetState(): BudgetState {
   if (typeof window === 'undefined') {
     return initialState
@@ -79,24 +104,7 @@ export function loadBudgetState(): BudgetState {
     }
 
     const parsed = JSON.parse(rawData) as Partial<BudgetState>
-    const budgetRaw = Number(parsed.initialBudget ?? DEFAULT_INITIAL_BUDGET)
-    const initialBudget =
-      Number.isFinite(budgetRaw) && budgetRaw >= 0 ? roundCurrency(budgetRaw) : DEFAULT_INITIAL_BUDGET
-
-    const expenses = (parsed.expenses ?? [])
-      .map((expense) => normalizeExpense(expense))
-      .filter((expense): expense is Expense => Boolean(expense))
-
-    const history = (parsed.history ?? [])
-      .map((item) => normalizeHistoryItem(item))
-      .filter((item): item is BudgetHistoryEntry => Boolean(item))
-      .slice(0, MAX_HISTORY_ITEMS)
-
-    return {
-      initialBudget,
-      expenses,
-      history,
-    }
+    return normalizeBudgetState(parsed)
   } catch {
     return initialState
   }
