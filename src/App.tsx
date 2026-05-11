@@ -313,12 +313,14 @@ function App() {
 
       <section className="top-grid">
         {canManage ? (
-          <ExpenseForm
-            key={editingExpense?.id ?? 'new-expense'}
-            onSubmit={handleExpenseSubmit}
-            editingExpense={editingExpense}
-            onCancelEdit={() => setEditingExpense(null)}
-          />
+          <div id="expense-form-anchor">
+            <ExpenseForm
+              key={editingExpense?.id ?? 'new-expense'}
+              onSubmit={handleExpenseSubmit}
+              editingExpense={editingExpense}
+              onCancelEdit={() => setEditingExpense(null)}
+            />
+          </div>
         ) : (
           <section className="panel">
             <div className="panel-header">
@@ -369,6 +371,9 @@ function App() {
             return
           }
           setEditingExpense(expense)
+          document
+            .getElementById('expense-form-anchor')
+            ?.scrollIntoView({ behavior: 'smooth', block: 'start' })
         }}
         onDelete={(expenseId) => {
           if (!canManage) {
