@@ -7,6 +7,7 @@ import { ExpensesTable } from './components/ExpensesTable'
 import { FiltersBar } from './components/FiltersBar'
 import { HistoryPanel } from './components/HistoryPanel'
 import { useBudget } from './context/BudgetContext'
+import { isSupabaseConfigured } from './lib/supabase'
 import type { Expense, ExpenseFilters, ExpenseFormValues } from './types/budget'
 import { applyExpenseFilters } from './utils/calculations'
 import { exportExpensesToCsv, exportReportToPdfLikePrint } from './utils/export'
@@ -202,6 +203,9 @@ function App() {
           </p>
           <p className="subtitle">
             Connecte: <strong>{currentVisitor.name}</strong> ({canManage ? 'Admin' : 'Lecture seule'})
+          </p>
+          <p className="subtitle">
+            Sync cloud: <strong>{isSupabaseConfigured ? 'Supabase actif' : 'Supabase non configure'}</strong>
           </p>
         </div>
         {canManage ? (
