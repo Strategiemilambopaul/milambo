@@ -13,6 +13,7 @@ export const DEFAULT_CATEGORIES = [
   'Transport macon',
   'Transport materiaux',
   'Repas macon',
+  'Autre',
 ] as const
 
 export type Category = (typeof DEFAULT_CATEGORIES)[number]
