@@ -53,20 +53,6 @@ const HOUSE_FACETS = [
   '/maison/facette-13.png',
 ]
 const HOME_BACKGROUNDS = HOUSE_FACETS.slice(0, 10)
-const WORK_ABOVE_PLAN = [
-  {
-    title: 'Phase 1: Structure au-dessus',
-    detail: 'Verifier poteaux, chainage, dalle et points de charge avant toute nouvelle extension.',
-  },
-  {
-    title: 'Phase 2: Etancheite et securite',
-    detail: 'Prevoir evacuation des eaux, traitement anti-infiltration et garde-corps temporaire.',
-  },
-  {
-    title: 'Phase 3: Finitions et reseaux',
-    detail: 'Planifier electricite, plafonds, carrelage et peinture avec budget dedie par zone.',
-  },
-]
 
 function getInitialVisitorName(): string {
   if (typeof window === 'undefined') {
@@ -250,37 +236,6 @@ function App() {
         remainingBudget={summary.remainingBudget}
         spentPercentage={summary.spentPercentage}
       />
-
-      <section className="project-vision">
-        <article className="panel vision-card">
-          <div>
-            <h2>Theme architectural de la maison Milambo</h2>
-            <p className="muted">
-              Style moderne avec ferronnerie decorative, marbre contraste et eclairage chaud. Cette
-              galerie montre les facettes reelles pour guider les depenses et les prochaines finitions.
-            </p>
-          </div>
-          <img
-            src="/maison/facette-13.png"
-            alt="Facade principale de la maison Milambo"
-            className="vision-cover"
-            loading="lazy"
-          />
-        </article>
-        <article className="panel">
-          <div className="panel-header">
-            <h2>Plan de travail au-dessus</h2>
-          </div>
-          <div className="work-plan-grid">
-            {WORK_ABOVE_PLAN.map((step) => (
-              <div key={step.title} className="work-plan-card">
-                <h3>{step.title}</h3>
-                <p>{step.detail}</p>
-              </div>
-            ))}
-          </div>
-        </article>
-      </section>
 
       <section className="panel">
         <div className="panel-header">
