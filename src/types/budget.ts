@@ -6,6 +6,7 @@ export const DEFAULT_CATEGORIES = [
   'Brouette',
   'Machette',
   'Sable',
+  'Ciment',
   'Caillasse',
   'Barre de fer 6',
   'Barre de fer 12',
